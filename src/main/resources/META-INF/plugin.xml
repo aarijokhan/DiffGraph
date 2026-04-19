@@ -26,4 +26,22 @@
     <extensions defaultExtensionNs="com.intellij">
 
     </extensions>
+
+    <!-- Actions -->
+    <actions>
+        <action id="DiffGraph.AnalyzeChanges"
+                class="com.aarijokhan.diffgraph.actions.AnalyzeChangesAction"
+                text="DiffGraph: Analyze Changes"
+                description="Analyze current changes and show changed file paths">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift G"/>
+        </action>
+        <action id="DiffGraph.FindUsages"
+                class="com.aarijokhan.diffgraph.actions.FindUsagesAction"
+                text="DiffGraph: Find Usages Count"
+                description="Count references to the symbol at caret">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift U"/>
+        </action>
+    </actions>
 </idea-plugin>

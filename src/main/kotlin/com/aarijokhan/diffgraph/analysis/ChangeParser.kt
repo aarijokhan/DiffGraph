@@ -70,10 +70,12 @@ class ChangeParser {
 
             val intersectsAdded = symbolLines.any { it in addedLines }
             val intersectsRemoved = symbolLines.any { it in removedLines }
-            val allInAdded = symbolLines.isNotEmpty() && symbolLines.all { it in addedLines }
+            val purelyAdded = symbolLines.isNotEmpty()
+                && symbolLines.all { it in addedLines }
+                && symbolLines.none { it in removedLines }
 
             val changeType = when {
-                allInAdded -> ChangeType.ADDED
+                purelyAdded -> ChangeType.ADDED
                 intersectsAdded || intersectsRemoved -> ChangeType.MODIFIED
                 else -> ChangeType.MODIFIED
             }

@@ -146,13 +146,22 @@ class ChangeParser {
     private fun findInnermostMember(element: PsiElement): PsiNamedElement? {
         var current: PsiElement? = element
         while (current != null && current !is PsiFile) {
-            if (current is PsiNamedElement && current is PsiMember) {
+            if (current is PsiNamedElement) {
                 val named: PsiNamedElement = current
-                if (!named.name.isNullOrBlank()) return named
+                if (!named.name.isNullOrBlank() && (current is PsiMember || isKotlinMemberLike(current))) {
+                    return named
+                }
             }
             current = current.parent
         }
         return null
+    }
+
+    private fun isKotlinMemberLike(element: PsiElement): Boolean {
+        val className = element.javaClass.simpleName
+        if (className !in KOTLIN_DECL_NAMES) return false
+        val parentName = element.parent?.javaClass?.simpleName ?: return false
+        return parentName in KOTLIN_MEMBER_PARENTS
     }
 
     private fun collapseToInnermost(candidates: Collection<PsiNamedElement>): List<PsiNamedElement> {
@@ -252,6 +261,13 @@ class ChangeParser {
         )
         private val DECL_JAVA_METHOD_REGEX = Regex(
             """(?:public|private|protected|static|final|abstract|synchronized|native|default)\s+(?:[\w<>\[\], ]+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*\("""
+        )
+        private val KOTLIN_DECL_NAMES = setOf(
+            "KtNamedFunction", "KtClass", "KtObjectDeclaration",
+            "KtProperty", "KtTypeAlias", "KtEnumEntry"
+        )
+        private val KOTLIN_MEMBER_PARENTS = setOf(
+            "KtFile", "KtClassBody"
         )
     }
 }

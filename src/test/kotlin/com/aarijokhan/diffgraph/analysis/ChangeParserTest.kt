@@ -186,6 +186,39 @@ class ChangeParserTest : BasePlatformTestCase() {
         assertTrue("should find charlie DELETED via regex: got $symbols", byName["charlie"]?.changeType == ChangeType.DELETED)
     }
 
+    fun testSingleLineModificationIsNotClassifiedAsAdded() {
+        val text = """
+            |public class Foo {
+            |    public static final int MAX = 40;
+            |}
+        """.trimMargin()
+        val psi = configureJava("Foo.java", text)
+        val file = changedFile(
+            path = "Foo.java",
+            changeType = ChangeType.MODIFIED,
+            hunks = listOf(
+                hunk(
+                    newStart = 2,
+                    newCount = 1,
+                    oldStart = 2,
+                    oldCount = 1,
+                    addedLineNumbers = listOf(2),
+                    removedLineNumbers = listOf(2),
+                    addedContent = listOf("    public static final int MAX = 40;"),
+                    removedContent = listOf("    public static final int MAX = 30;")
+                )
+            )
+        )
+
+        val symbols = runParse(psi, file)
+        val maxField = symbols.single { it.name == "MAX" }
+        assertEquals(
+            "single-line symbol with line in both added+removed is MODIFIED, not ADDED",
+            ChangeType.MODIFIED,
+            maxField.changeType
+        )
+    }
+
     fun testCapturesSignatureHintForMethod() {
         val text = """
             |public class Foo {
